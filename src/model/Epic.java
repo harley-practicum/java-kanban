@@ -10,12 +10,15 @@ public class Epic extends Task {
         super(id, title, description, status);
         this.subtasks = new ArrayList<>(); // Инициализация списка подзадач
     }
+
     public void addSubtask(Subtask subtask) {
         subtasks.add(subtask); // Добавление подзадачи в список
     }
+
     public List<Subtask> getSubtasks() {
         return subtasks;
     }
+
     public void removeSubtask(int id) {
         Subtask subtaskToRemove = null;
         for (Subtask subtask : subtasks) {
@@ -28,6 +31,7 @@ public class Epic extends Task {
             subtasks.remove(subtaskToRemove); // Удаляем подзадачу из списка
         }
     }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -35,10 +39,12 @@ public class Epic extends Task {
         if (!super.equals(o)) return false;
         return Objects.equals(subtasks, epic.subtasks);
     }
+
     @Override
     public int hashCode() {
         return Objects.hash(super.hashCode(), subtasks);
     }
+
     @Override
     public String toString() {
         return "Epic{" +

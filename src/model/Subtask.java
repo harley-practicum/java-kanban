@@ -10,9 +10,11 @@ public class Subtask extends Task {
         super(id, title, description, status);
         this.epicId = epicId; // Установка ID эпика
     }
+
     public int getEpicId() {
         return epicId; // Получение ID эпика
     }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -24,6 +26,7 @@ public class Subtask extends Task {
     public int hashCode() {
         return Objects.hash(super.hashCode(), epicId);
     }
+
     @Override
     public String toString() {
         return "Subtask{" +
