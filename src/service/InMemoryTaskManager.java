@@ -20,10 +20,6 @@ public class InMemoryTaskManager implements TaskManager {
         this.historyManager = historyManager;
     }
 
-    /*  private int getNextId() {
-        return nextId;
-    }*/
-
     @Override
     public int addNewTask(Task task) {
         if (task == null) {
@@ -207,20 +203,22 @@ public class InMemoryTaskManager implements TaskManager {
             // Удаляем задачу по ID
             tasks.remove(id);
         }
-        @Override
-        public void deleteSubtask ( int id){
-            if (!subtasks.containsKey(id)) {
-                throw new NoSuchElementException("Subtask with id " + id + " does not exist.");
-            }
-            Subtask subtask = subtasks.get(id); // Получаем подзадачу
-            int epicId = subtask.getEpicId(); // Получаем ID эпика, связанного с подзадачей
-            Epic epic = epics.get(epicId);
-            if (epic != null) {// Проверяем, существует ли эпик
-                epic.removeSubtask(id); // Удаляем подзадачу из эпика
-                updateEpicStatus(epicId); // Обновляем статус эпика после удаления подзадачи
-            }
-            subtasks.remove(id);// Удаляем подзадачу из глобального списка подзадач
+    @Override
+
+    public void deleteSubtask(int id) {
+        if (!subtasks.containsKey(id)) {
+            throw new NoSuchElementException("Subtask с таким id" + id + " не существует.");
         }
+        Subtask subtask = subtasks.get(id); // Получаем подзадачу
+        int epicId = subtask.getEpicId(); // Получаем ID эпика, связанного с подзадачей
+        Epic epic = epics.get(epicId);
+        if (epic != null) {// Проверяем, существует ли эпик
+            epic.removeSubtask(id); // Удаляем подзадачу из эпика
+            updateEpicStatus(epicId); // Обновляем статус эпика после удаления подзадачи
+        }
+        subtasks.remove(id);// Удаляем подзадачу из глобального списка подзадач
+    }
+
     @Override
     public void deleteEpic(int id) {
         // Получаем эпик по ID
