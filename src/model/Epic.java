@@ -5,7 +5,9 @@ import java.util.List;
 import java.util.Objects;
 
 public class Epic extends Task {
+
     private final List<Subtask> subtasks; // Список подзадач
+
     public Epic(int id, String title, String description,Status status) {
         super(id, title, description, status);
         this.subtasks = new ArrayList<>(); // Инициализация списка подзадач
