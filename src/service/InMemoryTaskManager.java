@@ -315,7 +315,7 @@ public class InMemoryTaskManager implements TaskManager {
         } else if (inProgressCount > 0) {
             epic.setStatus(Status.IN_PROGRESS); // Есть хотя бы одна подзадача в процессе
         } else {
-
+            epic.setStatus(Status.NEW);
         }
 
     }

@@ -47,5 +47,4 @@ public interface TaskManager {
     void deleteAllEpics();
 
     void deleteAllSubtasks();
-
 }
