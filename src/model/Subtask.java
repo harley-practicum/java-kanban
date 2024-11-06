@@ -22,6 +22,7 @@ public class Subtask extends Task {
         if (!super.equals(o)) return false;
         return epicId == subtask.epicId;
     }
+
     @Override
     public int hashCode() {
         return Objects.hash(super.hashCode(), epicId);
@@ -37,4 +38,5 @@ public class Subtask extends Task {
                 ", epicId=" + epicId +
                 '}';
     }
+
 }
