@@ -34,6 +34,14 @@ public class Epic extends Task {
         }
     }
 
+    public void updateSubtask(Subtask updatedSubtask) {
+        // Находим подзадачу по ID и удаляем её из списка
+        removeSubtask(updatedSubtask.getId());
+
+        // Добавляем обновлённую версию подзадачи в список
+        addSubtask(updatedSubtask);
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
