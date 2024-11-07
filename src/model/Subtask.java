@@ -18,14 +18,14 @@ public class Subtask extends Task {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof Subtask subtask)) return false;
-        if (!super.equals(o)) return false;
-        return epicId == subtask.epicId;
+        if (!(o instanceof Subtask)) return false; // Проверка типа объекта
+        Subtask subtask = (Subtask) o;
+        return id == subtask.id; // Сравниваем только по id
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), epicId);
+        return Objects.hash(id); // Генерируем hashCode только по id
     }
 
     @Override

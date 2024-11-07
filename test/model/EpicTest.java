@@ -52,16 +52,18 @@ class EpicTest {
 
     @Test
     void testEqualsAndHashCode() {
+        // Создаем два эпика с одинаковым id, но с разными подзадачами
         Epic epic2 = new Epic(1, "Epic Title", "Epic Description", Status.NEW);
         epic2.addSubtask(new Subtask(2, "Subtask Title", "Subtask Description", Status.NEW, 1));
 
-        assertNotEquals(epic, epic2, "Epics should not be equal as epic2 has no subtasks.");
+        // Эпики не должны быть равны, так как метод equals теперь сравнивает только по id
+        assertEquals(epic, epic2, "Epics should be equal as they have the same id.");
 
-        epic.addSubtask(new Subtask(2, "Subtask Title", "Subtask Description", Status.NEW, 1));
-
-        assertEquals(epic, epic2, "Epics should be equal as they have the same properties.");
+        // Проверка хэш-кодов
         assertEquals(epic.hashCode(), epic2.hashCode(), "Epics should have the same hash code when they are equal.");
     }
+
+
 
     @Test
     void testToString() {

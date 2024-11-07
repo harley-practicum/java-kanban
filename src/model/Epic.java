@@ -37,15 +37,16 @@ public class Epic extends Task {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof Epic epic)) return false;
-        if (!super.equals(o)) return false;
-        return Objects.equals(subtasks, epic.subtasks);
+        if (!(o instanceof Epic)) return false;
+        Epic epic = (Epic) o;
+        return id == epic.id; // Сравниваем только по id
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), subtasks);
+        return Objects.hash(id); // hashCode только по id
     }
+
 
     @Override
     public String toString() {
