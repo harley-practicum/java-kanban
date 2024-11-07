@@ -1,7 +1,6 @@
 package service;
 
 import model.Task;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -28,18 +27,24 @@ public class InMemoryHistoryManager implements HistoryManager {
     // Добавление задачи в историю просмотров
     @Override
     public void add(Task task) {
+        // Проверка на null для входного параметра
+        if (task == null) {
+            return; // Если задача равна null, не добавляем её в историю
+        }
+
         // Если задача уже существует в истории, удаляем старый просмотр
         if (taskMap.containsKey(task.getId())) {
             removeNode(taskMap.get(task.getId()));
         }
 
-        // Создаём новый узел для задачи и добавляем его в конец списка
+        // Создаем новый узел для задачи и добавляем его в конец истории
         Node newNode = new Node(task);
         linkLast(newNode);
-        taskMap.put(task.getId(), newNode); // Обновляем хеш-таблицу
+
+        // Добавляем узел в map для быстрого доступа по id задачи
+        taskMap.put(task.getId(), newNode);
     }
 
-    // Метод удаления узла из двусвязного списка за O(1)
     private void removeNode(Node node) {
         if (node == null) return;
 
@@ -91,5 +96,3 @@ public class InMemoryHistoryManager implements HistoryManager {
         return history;
     }
 }
-
-
