@@ -1,9 +1,10 @@
 package model;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
 import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 class EpicTest {
 
@@ -65,9 +66,22 @@ class EpicTest {
 
 
 
+
     @Test
     void testToString() {
-        String expected = "Epic{id=1, title='Epic Title', description='Epic Description', status=NEW, subtasks=[]}";
-        assertEquals(expected, epic.toString(), "toString() should return the correct string representation.");
+        // Создаем объект Epic
+        Epic epic = new Epic(1, "Epic Title", "Epic Description", Status.NEW);
+
+        // Добавляем подзадачи, чтобы проверить количество в выводе
+        Subtask subtask1 = new Subtask(2, "Subtask 1", "Subtask Description 1", Status.NEW, 1);
+        Subtask subtask2 = new Subtask(3, "Subtask 2", "Subtask Description 2", Status.DONE, 1);
+        epic.addSubtask(subtask1);
+        epic.addSubtask(subtask2);
+
+        // Ожидаемая строка
+        String expected = "1,Epic Title,Epic Description,NEW,EPIC,2";
+
+        // Проверяем результат метода toString
+        assertEquals(expected, epic.toString(), "Метод toString должен возвращать корректную строку в формате CSV.");
     }
 }

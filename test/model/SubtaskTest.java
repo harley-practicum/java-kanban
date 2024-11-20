@@ -33,9 +33,13 @@ class SubtaskTest {
 
     @Test
     void testToString() {
-        Subtask subtask = new Subtask(1, "Subtask 1", "Description of subtask 1", Status.NEW, 100);
+        // Создаём объект Subtask
+        Subtask subtask = new Subtask(1, "Subtask Title", "Subtask Description", Status.IN_PROGRESS, 101);
 
-        String expectedString = "Subtask{id=1, title='Subtask 1', description='Description of subtask 1', status=NEW, epicId=100}";
-        assertEquals(expectedString, subtask.toString());
+        // Ожидаемая строка в формате CSV
+        String expected = "1,Subtask Title,Subtask Description,IN_PROGRESS,101,SUBTASK";
+
+        // Проверяем результат метода toString
+        assertEquals(expected, subtask.toString(), "Метод toString должен возвращать корректную строку в формате CSV.");
     }
 }

@@ -49,8 +49,14 @@ class TaskTest {
 
     @Test
     void testToString() {
-        String expectedString = "Task{id=1, title='Test Task', description='This is a test description', status=NEW}";
-        assertEquals(expectedString, task.toString()); // Проверяем правильность вывода метода toString
+        // Создаём объект Task
+        Task task = new Task(1, "Task Title", "Task Description", Status.NEW);
+
+        // Ожидаемая строка в формате CSV
+        String expected = "1,Task Title,Task Description,NEW,TASK";
+
+        // Проверяем результат метода toString
+        assertEquals(expected, task.toString(), "Метод toString должен возвращать корректную строку в формате CSV.");
     }
 }
 

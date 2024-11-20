@@ -8,9 +8,10 @@ public class Epic extends Task {
 
     private final List<Subtask> subtasks; // Список подзадач
 
-    public Epic(int id, String title, String description,Status status) {
+    public Epic(int id, String title, String description, Status status) {
         super(id, title, description, status);
         this.subtasks = new ArrayList<>(); // Инициализация списка подзадач
+        this.type = TaskType.EPIC; // Устанавливаем тип как EPIC
     }
 
     public void addSubtask(Subtask subtask) {
@@ -55,16 +56,33 @@ public class Epic extends Task {
         return Objects.hash(id); // hashCode только по id
     }
 
-
     @Override
     public String toString() {
-        return "Epic{" +
-                "id=" + id +
-                ", title='" + title + '\'' +
-                ", description='" + description + '\'' +
-                ", status=" + status +
-                ", subtasks=" + subtasks +
-                '}';
+        // Возвращаем строку в формате CSV в порядке: id, title, description, status, type, subtasks.size()
+        return id + "," +
+                title + "," +
+                description + "," +
+                status + "," +
+                type + "," +
+                subtasks.size(); // Добавляем количество подзадач
+    }
+
+    // Метод для создания объекта Epic из строки
+    public static Epic fromString(String value) {
+        // Разбиваем строку на части
+        String[] fields = value.split(",");
+
+        // Получаем значения из строки
+        int id = Integer.parseInt(fields[0]);
+        String title = fields[1];
+        String description = fields[2];
+        Status status = Status.valueOf(fields[3]);
+
+        // Создаём объект Epic
+        Epic epic = new Epic(id, title, description, status);
+
+        // Возвращаем созданный объект Epic
+        return epic;
     }
 }
 

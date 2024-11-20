@@ -10,9 +10,9 @@ import java.util.*;
 
 public class InMemoryTaskManager implements TaskManager {
 
-    private final Map<Integer, Task> tasks = new HashMap<>(); // Задачи
-    private final Map<Integer, Epic> epics = new HashMap<>(); // Эпики
-    private final Map<Integer, Subtask> subtasks = new HashMap<>(); // Подзадачи
+    protected final Map<Integer, Task> tasks = new HashMap<>(); // Задачи
+    protected final Map<Integer, Epic> epics = new HashMap<>(); // Эпики
+    protected final Map<Integer, Subtask> subtasks = new HashMap<>(); // Подзадачи
     protected HistoryManager historyManager; // Менеджер истории
     private int nextId = 1; // Счетчик для ID
 
