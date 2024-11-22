@@ -20,6 +20,10 @@ public class InMemoryTaskManager implements TaskManager {
         this.historyManager = historyManager;
     }
 
+    public InMemoryTaskManager() {
+        this.historyManager = Managers.getDefaultHistory();
+    }
+
     @Override
     public int addNewTask(Task task) {
         if (task == null) {

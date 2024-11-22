@@ -73,7 +73,7 @@ public class Epic extends Task {
                 type + "," +
                 title + "," +
                 status + "," +
-                description + ",epic";
+                description ;
     }
 
 }

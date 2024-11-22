@@ -48,7 +48,7 @@ public class Subtask extends Task {
                 title + "," +
                 status + "," +
                 description + "," +
-                epicId + ",subtask";
+                epicId ;
     }
 }
 

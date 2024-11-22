@@ -28,7 +28,6 @@ class FileBackedTaskManagerTest {
         Files.createFile(Paths.get(TEMP_FILE_PATH));
     }
 
-
     @Test
     void testAddTask() {
         // Создаем временный файл для хранения данных
@@ -46,35 +45,6 @@ class FileBackedTaskManagerTest {
         }
     }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     @Test
     void testFileCreationOnLoad() {
         // Убедитесь, что файл создается, если он не существует
@@ -82,7 +52,3 @@ class FileBackedTaskManagerTest {
         assertTrue(Files.exists(Paths.get(TEMP_FILE_PATH)), "Файл должен быть создан при загрузке.");
     }
 }
-
-
-
-

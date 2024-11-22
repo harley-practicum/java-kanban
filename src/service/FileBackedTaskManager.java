@@ -12,81 +12,79 @@ import java.util.*;
 public class FileBackedTaskManager extends InMemoryTaskManager {
 
     private String filePath;
-    private boolean isHeaderWritten = true;
 
-    public FileBackedTaskManager(HistoryManager historyManager, String filePath) {
+    public FileBackedTaskManager(HistoryManager historyManager,String filePath) {
         super(historyManager); // Инициализируем родительский класс с historyManager
         this.filePath = filePath;
     }
 
 
     // Метод для загрузки данных из файла
-    public static FileBackedTaskManager loadFromFile(HistoryManager historyManager, File file) {
+    public static FileBackedTaskManager loadFromFile(File file) {
         // Проверяем, существует ли файл
         if (!file.exists()) {
             System.err.println("Файл не найден: " + file.getPath());
-            return null; // Возвращаем null, если файл не существует
+            return null;
         }
 
+        // Получаем дефолтный historyManager
+        HistoryManager historyManager = Managers.getDefaultHistory();
 
+        // Создаём менеджер с пустым historyManager
         FileBackedTaskManager manager = new FileBackedTaskManager(historyManager, file.getPath());
 
         try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
             String line;
 
             // Пропускаем первую строку (заголовок)
-            reader.readLine(); // Пропускаем заголовок
+            reader.readLine();
 
             // Чтение остальных строк из файла
             while ((line = reader.readLine()) != null) {
-                // Пропускаем пустые строки
-                if (line.trim().isEmpty()) continue;
+                if (line.trim().isEmpty()) {
+                    continue; // Пропускаем пустые строки
+                }
 
-                // Разбиваем строку на части, разделённые запятой
                 String[] fields = line.split(",");
-                System.out.println("Чтение строки: " + line);  // Отладочное сообщение
-                System.out.println("Разделённые данные: " + Arrays.toString(fields));  // Отладочное сообщение
+                System.out.println("Чтение строки: " + line);
+                System.out.println("Разделённые данные: " + Arrays.toString(fields));
 
-                // Проверяем, что количество полей соответствует необходимому
                 if (fields.length < 5) {
                     System.err.println("Неверное количество данных в строке: " + line);
                     continue;
                 }
 
                 try {
-                    // Считываем данные из строки
-                    int id = Integer.parseInt(fields[0]); // id всегда первое поле
-                    String title = fields[2]; // Название задачи
-                    String description = fields[4]; // Описание задачи
-                    Status status = Status.valueOf(fields[3]); // Статус задачи
+                    // Парсим данные с учётом вашей очередности
+                    int id = Integer.parseInt(fields[0]);          // ID задачи
                     TaskType taskType = TaskType.valueOf(fields[1]); // Тип задачи
+                    String title = fields[2];                     // Название задачи
+                    Status status = Status.valueOf(fields[3]);    // Статус задачи
+                    String description = fields[4];              // Описание задачи
 
-                    // В зависимости от типа задачи создаем соответствующий объект
                     switch (taskType) {
                         case TASK:
                             Task task = new Task(id, title, description, status);
-                            manager.tasks.put(task.getId(), task); // Добавляем задачу в Map
+                            manager.tasks.put(task.getId(), task);
                             break;
 
                         case EPIC:
                             Epic epic = new Epic(id, title, description, status);
-                            manager.epics.put(epic.getId(), epic); // Добавляем эпик в Map
+                            manager.epics.put(epic.getId(), epic);
                             break;
 
                         case SUBTASK:
-                            // Подзадача должна содержать ID эпика в поле epic (в строке CSV это 5-й элемент)
                             if (fields.length < 6) {
                                 System.err.println("Подзадача должна содержать ID эпика, пропуск строки.");
                                 continue;
                             }
-                            int epicId = Integer.parseInt(fields[5]); // Получаем id эпика для подзадачи
+                            int epicId = Integer.parseInt(fields[5]); // ID эпика
                             Subtask subtask = new Subtask(id, title, description, status, epicId);
-                            manager.subtasks.put(subtask.getId(), subtask); // Добавляем подзадачу в Map
+                            manager.subtasks.put(subtask.getId(), subtask);
 
-                            // Связываем подзадачу с эпиком
-                            Epic epicSubtask = manager.epics.get(subtask.getEpicId());
-                            if (epicSubtask != null) {
-                                epicSubtask.addSubtask(subtask); // Добавляем подзадачу в список подзадач эпика
+                            Epic parentEpic = manager.epics.get(subtask.getEpicId());
+                            if (parentEpic != null) {
+                                parentEpic.addSubtask(subtask);
                             } else {
                                 System.err.println("Не найден эпик с ID: " + subtask.getEpicId());
                             }
@@ -96,10 +94,10 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                             System.err.println("Неизвестный тип задачи: " + taskType);
                             break;
                     }
+
                 } catch (NumberFormatException e) {
                     System.err.println("Ошибка формата числа для ID: " + line + " — " + e.getMessage());
                 } catch (IllegalArgumentException e) {
-                    // Обработка исключения IllegalArgumentException для статуса и типа задачи
                     System.err.println("Ошибка обработки строки: " + line + " — " + e.getMessage());
                 }
             }
@@ -115,22 +113,19 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     private void saveToFile() {
         // Используем try-with-resources для записи в файл
         try (BufferedWriter writer = Files.newBufferedWriter(Paths.get(filePath))) {
-            if (isHeaderWritten) { // Проверяем, был ли записан заголовок
-                writer.write("ID,TYPE,NAME,STATUS,DESCRIPTION,EPIC");
-                writer.newLine();
-                isHeaderWritten = false;
-            }
+            writer.write("ID,TYPE,NAME,STATUS,DESCRIPTION,EPIC");
+            writer.newLine();
 
             // Сохраняем все задачи
-            for (Task task : getTasks()) {
+            for (Task task : super.getTasks()) {  // Используем метод родителя для получения задач
                 if (task != null) {
                     writer.write(task.toCSV());
                     writer.newLine();
                 }
             }
 
-            // Сохраняем все эпики (без подзадач)
-            for (Epic epic : getEpics()) {
+            // Сохраняем все эпики
+            for (Epic epic : super.getEpics()) {  // Используем метод родителя для получения эпиков
                 if (epic != null) {
                     writer.write(epic.toCSV());
                     writer.newLine();
@@ -138,10 +133,10 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
             }
 
             // Сохраняем подзадачи, привязанные к эпику
-            for (Subtask subtask : getSubtasks()) {
+            for (Subtask subtask : super.getSubtasks()) {  // Используем метод родителя для получения подзадач
                 if (subtask != null) {
                     // Проверка существования эпика с данным ID
-                    boolean epicExists = getEpics().stream()
+                    boolean epicExists = super.getEpics().stream()
                             .anyMatch(epic -> epic.getId() == subtask.getEpicId());
 
                     if (epicExists) {
@@ -256,7 +251,6 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         }
     }
 
-
     @Override
     public void deleteEpic(int id) {
         try {
@@ -271,7 +265,6 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
             e.printStackTrace();
         }
     }
-
 
     @Override
     public void deleteSubtask(int id) {
@@ -313,7 +306,6 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         return super.getEpic(id);
     }
 
-    @Override
     public List<Task> getHistory() {
         return super.getHistory();
     }
