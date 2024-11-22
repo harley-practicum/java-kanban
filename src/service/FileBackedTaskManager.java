@@ -159,6 +159,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         }
     }
     
+
     @Override
     public int addNewTask(Task task) {
         int id = super.addNewTask(task);  // Сначала добавляем задачу
