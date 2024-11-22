@@ -3,6 +3,7 @@ package service;
 import exception.ManagerLoadException;
 import exception.ManagerSaveException;
 import model.*;
+
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -115,15 +116,15 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         // Используем try-with-resources для записи в файл
         try (BufferedWriter writer = Files.newBufferedWriter(Paths.get(filePath))) {
             if (isHeaderWritten) { // Проверяем, был ли записан заголовок
-                writer.write("ID,TYPE,NAME,STATUS,DESCRIPTION,EPIC"); // Записываем заголовок
+                writer.write("ID,TYPE,NAME,STATUS,DESCRIPTION,EPIC");
                 writer.newLine();
-                isHeaderWritten = false; // Устанавливаем флаг на уровне класса
+                isHeaderWritten = false;
             }
 
             // Сохраняем все задачи
             for (Task task : getTasks()) {
                 if (task != null) {
-                    writer.write(task.toCSV());  // Записываем задачу в формате CSV
+                    writer.write(task.toCSV());
                     writer.newLine();
                 }
             }
@@ -131,7 +132,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
             // Сохраняем все эпики (без подзадач)
             for (Epic epic : getEpics()) {
                 if (epic != null) {
-                    writer.write(epic.toCSV());  // Записываем эпик в формате CSV
+                    writer.write(epic.toCSV());
                     writer.newLine();
                 }
             }
@@ -144,7 +145,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                             .anyMatch(epic -> epic.getId() == subtask.getEpicId());
 
                     if (epicExists) {
-                        writer.write(subtask.toCSV());  // Записываем подзадачу в формате CSV
+                        writer.write(subtask.toCSV());
                         writer.newLine();
                     } else {
                         // Если эпик не найден, выбрасываем исключение
@@ -158,30 +159,29 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
             throw new ManagerSaveException("Ошибка записи в файл: " + e.getMessage(), e);
         }
     }
-    
 
     @Override
     public int addNewTask(Task task) {
-        int id = super.addNewTask(task);  // Сначала добавляем задачу
+        int id = super.addNewTask(task);
         try {
-            saveToFile();  // Сохраняем данные в файл
+            saveToFile();
         } catch (ManagerSaveException e) {
             // Обрабатываем ошибку при сохранении
             System.err.println("Ошибка при сохранении данных: " + e.getMessage());
-            e.printStackTrace();  // Выводим подробности ошибки
+            e.printStackTrace();
         }
         return id;
     }
 
     @Override
     public int addNewEpic(Epic epic) {
-        int id = super.addNewEpic(epic);  // Добавляем новый эпик
+        int id = super.addNewEpic(epic);
         try {
             saveToFile();  // Сохраняем данные в файл
         } catch (ManagerSaveException e) {
             // Обрабатываем ошибку при сохранении
             System.err.println("Ошибка при сохранении данных: " + e.getMessage());
-            e.printStackTrace();  // Выводим подробности ошибки
+            e.printStackTrace();
         }
         return id;
     }
@@ -194,32 +194,32 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         } catch (ManagerSaveException e) {
             // Обрабатываем ошибку при сохранении
             System.err.println("Ошибка при сохранении данных: " + e.getMessage());
-            e.printStackTrace();  // Выводим подробности ошибки
+            e.printStackTrace();
         }
         return id;
     }
 
     @Override
     public void updateTask(Task task) {
-        super.updateTask(task);  // Обновляем задачу в родительском классе
+        super.updateTask(task);
         try {
-            saveToFile();  // Сохраняем данные в файл
+            saveToFile();
         } catch (ManagerSaveException e) {
             // Обрабатываем ошибку при сохранении
             System.err.println("Ошибка при сохранении данных: " + e.getMessage());
-            e.printStackTrace();  // Выводим подробности ошибки
+            e.printStackTrace();
         }
     }
 
     @Override
     public void updateEpic(Epic epic) {
-        super.updateEpic(epic); // Вызываем родительский метод для обновления эпика
+        super.updateEpic(epic);
         try {
-            saveToFile();  // Сохраняем данные в файл
+            saveToFile();
         } catch (ManagerSaveException e) {
             // Обрабатываем ошибку при сохранении данных
             System.err.println("Ошибка при сохранении данных: " + e.getMessage());
-            e.printStackTrace();  // Выводим подробности ошибки
+            e.printStackTrace();
         }
     }
 
