@@ -109,6 +109,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         System.out.println("Данные успешно загружены из файла.");
         return manager;
     }
+
     // Метод для сохранения данных в файл
     private void saveToFile() {
         // Используем try-with-resources для записи в файл
@@ -134,6 +135,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                     writer.newLine();
                 }
             }
+
             // Сохраняем подзадачи, привязанные к эпику
             for (Subtask subtask : getSubtasks()) {
                 if (subtask != null) {
@@ -156,6 +158,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
             throw new ManagerSaveException("Ошибка записи в файл: " + e.getMessage(), e);
         }
     }
+    
     @Override
     public int addNewTask(Task task) {
         int id = super.addNewTask(task);  // Сначала добавляем задачу
