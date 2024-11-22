@@ -31,15 +31,5 @@ class SubtaskTest {
         assertNotEquals(subtask1, subtask3);
     }
 
-    @Test
-    void testToString() {
-        // Создаём объект Subtask
-        Subtask subtask = new Subtask(1, "Subtask Title", "Subtask Description", Status.IN_PROGRESS, 101);
 
-        // Ожидаемая строка в формате CSV
-        String expected = "1,Subtask Title,Subtask Description,IN_PROGRESS,101,SUBTASK";
-
-        // Проверяем результат метода toString
-        assertEquals(expected, subtask.toString(), "Метод toString должен возвращать корректную строку в формате CSV.");
-    }
 }

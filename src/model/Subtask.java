@@ -32,27 +32,23 @@ public class Subtask extends Task {
 
     @Override
     public String toString() {
-        // Форматируем строку в соответствии с порядком полей в конструкторе (CSV)
-        return id + "," +
-                title + "," +
-                description + "," +
-                status + "," +
-                epicId + "," +
-                type;
+        return "Subtask{" +
+                "id=" + id +
+                ", title='" + title + '\'' +
+                ", description='" + description + '\'' +
+                ", status=" + status +
+                ", epicId=" + epicId +
+                '}';
     }
 
-    // Метод для создания объекта Subtask из строки
-    public static Subtask fromString(String value) {
-        // Разбиваем строку на части
-        String[] fields = value.split(",");
-        int id = Integer.parseInt(fields[0]);
-        String title = fields[1];
-        String description = fields[2];
-        Status status = Status.valueOf(fields[3]);
-        int epicId = Integer.parseInt(fields[4]);
-        TaskType type = TaskType.valueOf(fields[5]);
-
-        return new Subtask(id, title, description, status, epicId);
+    @Override
+    public String toCSV() {
+        return id + "," +
+                type + "," +
+                title + "," +
+                status + "," +
+                description + "," +
+                epicId + ",subtask";
     }
 }
 

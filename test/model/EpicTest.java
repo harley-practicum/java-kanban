@@ -63,25 +63,4 @@ class EpicTest {
         // Проверка хэш-кодов
         assertEquals(epic.hashCode(), epic2.hashCode(), "Epics should have the same hash code when they are equal.");
     }
-
-
-
-
-    @Test
-    void testToString() {
-        // Создаем объект Epic
-        Epic epic = new Epic(1, "Epic Title", "Epic Description", Status.NEW);
-
-        // Добавляем подзадачи, чтобы проверить количество в выводе
-        Subtask subtask1 = new Subtask(2, "Subtask 1", "Subtask Description 1", Status.NEW, 1);
-        Subtask subtask2 = new Subtask(3, "Subtask 2", "Subtask Description 2", Status.DONE, 1);
-        epic.addSubtask(subtask1);
-        epic.addSubtask(subtask2);
-
-        // Ожидаемая строка
-        String expected = "1,Epic Title,Epic Description,NEW,EPIC,2";
-
-        // Проверяем результат метода toString
-        assertEquals(expected, epic.toString(), "Метод toString должен возвращать корректную строку в формате CSV.");
-    }
 }

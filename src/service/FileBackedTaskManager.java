@@ -5,250 +5,306 @@ import exception.ManagerSaveException;
 import model.*;
 import java.io.*;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 
-public class FileBackedTaskManager extends InMemoryTaskManager implements TaskManager {
+public class FileBackedTaskManager extends InMemoryTaskManager {
 
-    private final String filePath = "src/resources/tasks.csv"; // Путь к файлу
+    private String filePath;
+    private boolean isHeaderWritten = true;
 
-    public FileBackedTaskManager(HistoryManager historyManager) {
+    public FileBackedTaskManager(HistoryManager historyManager, String filePath) {
         super(historyManager); // Инициализируем родительский класс с historyManager
-        loadFromFile(); // Загружаем данные из файла при создании
+        this.filePath = filePath;
     }
 
+
     // Метод для загрузки данных из файла
-    public void loadFromFile() {
-        try {
-            File file = new File("src/resources/tasks.csv");
+    public static FileBackedTaskManager loadFromFile(HistoryManager historyManager, File file) {
+        // Проверяем, существует ли файл
+        if (!file.exists()) {
+            System.err.println("Файл не найден: " + file.getPath());
+            return null; // Возвращаем null, если файл не существует
+        }
 
-            // Если файл не существует, создаем его
-            if (!file.exists()) {
-                if (file.createNewFile()) {
-                    System.out.println("Файл tasks.csv был успешно создан в папке src/resources.");
-                } else {
-                    throw new IOException("Не удалось создать файл: tasks.csv");
+
+        FileBackedTaskManager manager = new FileBackedTaskManager(historyManager, file.getPath());
+
+        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+            String line;
+
+            // Пропускаем первую строку (заголовок)
+            reader.readLine(); // Пропускаем заголовок
+
+            // Чтение остальных строк из файла
+            while ((line = reader.readLine()) != null) {
+                // Пропускаем пустые строки
+                if (line.trim().isEmpty()) continue;
+
+                // Разбиваем строку на части, разделённые запятой
+                String[] fields = line.split(",");
+                System.out.println("Чтение строки: " + line);  // Отладочное сообщение
+                System.out.println("Разделённые данные: " + Arrays.toString(fields));  // Отладочное сообщение
+
+                // Проверяем, что количество полей соответствует необходимому
+                if (fields.length < 5) {
+                    System.err.println("Неверное количество данных в строке: " + line);
+                    continue;
+                }
+
+                try {
+                    // Считываем данные из строки
+                    int id = Integer.parseInt(fields[0]); // id всегда первое поле
+                    String title = fields[2]; // Название задачи
+                    String description = fields[4]; // Описание задачи
+                    Status status = Status.valueOf(fields[3]); // Статус задачи
+                    TaskType taskType = TaskType.valueOf(fields[1]); // Тип задачи
+
+                    // В зависимости от типа задачи создаем соответствующий объект
+                    switch (taskType) {
+                        case TASK:
+                            Task task = new Task(id, title, description, status);
+                            manager.tasks.put(task.getId(), task); // Добавляем задачу в Map
+                            break;
+
+                        case EPIC:
+                            Epic epic = new Epic(id, title, description, status);
+                            manager.epics.put(epic.getId(), epic); // Добавляем эпик в Map
+                            break;
+
+                        case SUBTASK:
+                            // Подзадача должна содержать ID эпика в поле epic (в строке CSV это 5-й элемент)
+                            if (fields.length < 6) {
+                                System.err.println("Подзадача должна содержать ID эпика, пропуск строки.");
+                                continue;
+                            }
+                            int epicId = Integer.parseInt(fields[5]); // Получаем id эпика для подзадачи
+                            Subtask subtask = new Subtask(id, title, description, status, epicId);
+                            manager.subtasks.put(subtask.getId(), subtask); // Добавляем подзадачу в Map
+
+                            // Связываем подзадачу с эпиком
+                            Epic epicSubtask = manager.epics.get(subtask.getEpicId());
+                            if (epicSubtask != null) {
+                                epicSubtask.addSubtask(subtask); // Добавляем подзадачу в список подзадач эпика
+                            } else {
+                                System.err.println("Не найден эпик с ID: " + subtask.getEpicId());
+                            }
+                            break;
+
+                        default:
+                            System.err.println("Неизвестный тип задачи: " + taskType);
+                            break;
+                    }
+                } catch (NumberFormatException e) {
+                    System.err.println("Ошибка формата числа для ID: " + line + " — " + e.getMessage());
+                } catch (IllegalArgumentException e) {
+                    // Обработка исключения IllegalArgumentException для статуса и типа задачи
+                    System.err.println("Ошибка обработки строки: " + line + " — " + e.getMessage());
                 }
             }
-
-            // Используем try-with-resources для чтения из файла
-            try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
-                String line;
-
-                // Чтение строк из файла
-                while ((line = reader.readLine()) != null) {
-                    // Пропускаем пустые строки
-                    if (line.trim().isEmpty()) continue;
-
-                    // Разбиваем строку на части, разделённые запятой
-                    String[] fields = line.split(",");
-                    // Проверяем, что количество полей соответствует необходимому
-                    if (fields.length < 5) {
-                        System.err.println("Неверное количество данных в строке: " + line);
-                        continue; // Пропускаем строку с ошибками
-                    }
-
-                    try {
-                        // Считываем данные из строки
-                        int id = Integer.parseInt(fields[0]);
-                        String name = fields[1];
-                        String description = fields[2];
-                        Status status = Status.valueOf(fields[3]);
-
-                        TaskType taskType = TaskType.valueOf(fields[4]);
-
-                        // В зависимости от типа задачи создаем соответствующий объект
-                        switch (taskType) {
-                            case TASK:
-                                Task task = new Task(id, name, description, status);
-                                tasks.put(task.getId(), task); // Добавляем задачу в Map
-                                break;
-
-                            case EPIC:
-                                Epic epic = new Epic(id, name, description, status);
-                                epics.put(epic.getId(), epic); // Добавляем эпик в Map
-                                break;
-
-                            case SUBTASK:
-                                if (fields.length < 6) {
-                                    System.err.println("Подзадача должна содержать ID эпика, пропуск строки.");
-                                    continue;
-                                }
-                                int epicId = Integer.parseInt(fields[5]);
-                                Subtask subtask = new Subtask(id, name, description, status, epicId);
-                                subtasks.put(subtask.getId(), subtask); // Добавляем подзадачу в Map
-
-                                // Связываем подзадачу с эпиком
-                                Epic epicSubtask = epics.get(subtask.getEpicId());
-                                if (epicSubtask != null) {
-                                    epicSubtask.addSubtask(subtask); // Добавляем подзадачу в список подзадач эпика
-                                } else {
-                                    System.err.println("Не найден эпик с ID: " + subtask.getEpicId());
-                                }
-                                break;
-
-                            default:
-                                System.err.println("Неизвестный тип задачи: " + taskType);
-                                break;
-                        }
-                    } catch (NumberFormatException e) {
-                        System.err.println("Ошибка формата числа: " + line + " — " + e.getMessage());
-                    } catch (IllegalArgumentException e) {
-                        // Обработка исключения IllegalArgumentException
-                        System.err.println("Ошибка обработки строки: " + line + " — " + e.getMessage());
-                    }
-                }
-            }
-
-            System.out.println("Данные успешно загружены из файла.");
         } catch (IOException e) {
             throw new ManagerLoadException("Ошибка при загрузке данных из файла", e);
         }
+
+        System.out.println("Данные успешно загружены из файла.");
+        return manager;
     }
-
-
     // Метод для сохранения данных в файл
-    public void saveToFile() {
-        Path filePath = Paths.get("src/resources/tasks.csv");
-        Path directoryPath = filePath.getParent();  // Получаем путь к родительской директории
-
-        // Проверяем, существует ли директория, если нет — создаём её
-        try {
-            if (Files.notExists(directoryPath)) {
-                Files.createDirectories(directoryPath);  // Создаём директорию, если она не существует
-            }
-
-            // Проверяем, существует ли файл, если нет — создаём его
-            if (Files.notExists(filePath)) {
-                Files.createFile(filePath);  // Создаём файл, если он не существует
-            }
-
-        } catch (IOException e) {
-            // Выбрасываем исключение ManagerSaveException при ошибке создания файла или директории
-            throw new ManagerSaveException("Ошибка при создании директории или файла: " + e.getMessage(), e);
-        }
-
+    private void saveToFile() {
         // Используем try-with-resources для записи в файл
-        try (BufferedWriter writer = Files.newBufferedWriter(filePath)) {
-            // Сохраняем все задачи в файл
+        try (BufferedWriter writer = Files.newBufferedWriter(Paths.get(filePath))) {
+            if (isHeaderWritten) { // Проверяем, был ли записан заголовок
+                writer.write("ID,TYPE,NAME,STATUS,DESCRIPTION,EPIC"); // Записываем заголовок
+                writer.newLine();
+                isHeaderWritten = false; // Устанавливаем флаг на уровне класса
+            }
+
+            // Сохраняем все задачи
             for (Task task : getTasks()) {
-                if (task == null) {
-                    throw new ManagerSaveException("Невалидные данные задачи при сохранении.");
+                if (task != null) {
+                    writer.write(task.toCSV());  // Записываем задачу в формате CSV
+                    writer.newLine();
                 }
-                writer.write(task.toString());
-                writer.newLine();
             }
+
+            // Сохраняем все эпики (без подзадач)
             for (Epic epic : getEpics()) {
-                if (epic == null) {
-                    throw new ManagerSaveException("Невалидные данные эпика при сохранении.");
+                if (epic != null) {
+                    writer.write(epic.toCSV());  // Записываем эпик в формате CSV
+                    writer.newLine();
                 }
-                writer.write(epic.toString());
-                writer.newLine();
             }
+            // Сохраняем подзадачи, привязанные к эпику
             for (Subtask subtask : getSubtasks()) {
-                if (subtask == null) {
-                    throw new ManagerSaveException("Невалидные данные подзадачи при сохранении.");
+                if (subtask != null) {
+                    // Проверка существования эпика с данным ID
+                    boolean epicExists = getEpics().stream()
+                            .anyMatch(epic -> epic.getId() == subtask.getEpicId());
+
+                    if (epicExists) {
+                        writer.write(subtask.toCSV());  // Записываем подзадачу в формате CSV
+                        writer.newLine();
+                    } else {
+                        // Если эпик не найден, выбрасываем исключение
+                        throw new IllegalArgumentException("Эпик с ID " + subtask.getEpicId() + " не существует!");
+                    }
                 }
-                writer.write(subtask.toString());
-                writer.newLine();
             }
+
         } catch (IOException e) {
             // Выбрасываем исключение ManagerSaveException при ошибке записи в файл
             throw new ManagerSaveException("Ошибка записи в файл: " + e.getMessage(), e);
-        } catch (ManagerSaveException e) {
-            // Логируем или перенаправляем исключение, если данные неверны
-            System.err.println("Ошибка данных: " + e.getMessage());
-            throw e;
         }
     }
-
-
     @Override
     public int addNewTask(Task task) {
-        int id = super.addNewTask(task);
-        saveToFile(); // Сохраняем данные
+        int id = super.addNewTask(task);  // Сначала добавляем задачу
+        try {
+            saveToFile();  // Сохраняем данные в файл
+        } catch (ManagerSaveException e) {
+            // Обрабатываем ошибку при сохранении
+            System.err.println("Ошибка при сохранении данных: " + e.getMessage());
+            e.printStackTrace();  // Выводим подробности ошибки
+        }
         return id;
     }
 
     @Override
     public int addNewEpic(Epic epic) {
-        int id = super.addNewEpic(epic);
-        saveToFile();
+        int id = super.addNewEpic(epic);  // Добавляем новый эпик
+        try {
+            saveToFile();  // Сохраняем данные в файл
+        } catch (ManagerSaveException e) {
+            // Обрабатываем ошибку при сохранении
+            System.err.println("Ошибка при сохранении данных: " + e.getMessage());
+            e.printStackTrace();  // Выводим подробности ошибки
+        }
         return id;
     }
 
     @Override
-    public Integer addNewSubtask(Subtask subtask) {
-        Integer id = super.addNewSubtask(subtask);
-        saveToFile();
+    public int addNewSubtask(Subtask subtask) {
+        int id = super.addNewSubtask(subtask); // Вызываем родительский метод
+        try {
+            saveToFile();  // Сохраняем данные в файл
+        } catch (ManagerSaveException e) {
+            // Обрабатываем ошибку при сохранении
+            System.err.println("Ошибка при сохранении данных: " + e.getMessage());
+            e.printStackTrace();  // Выводим подробности ошибки
+        }
         return id;
     }
 
     @Override
     public void updateTask(Task task) {
-        super.updateTask(task);
-        saveToFile();
+        super.updateTask(task);  // Обновляем задачу в родительском классе
+        try {
+            saveToFile();  // Сохраняем данные в файл
+        } catch (ManagerSaveException e) {
+            // Обрабатываем ошибку при сохранении
+            System.err.println("Ошибка при сохранении данных: " + e.getMessage());
+            e.printStackTrace();  // Выводим подробности ошибки
+        }
     }
 
     @Override
     public void updateEpic(Epic epic) {
-        super.updateEpic(epic);
-        saveToFile();
+        super.updateEpic(epic); // Вызываем родительский метод для обновления эпика
+        try {
+            saveToFile();  // Сохраняем данные в файл
+        } catch (ManagerSaveException e) {
+            // Обрабатываем ошибку при сохранении данных
+            System.err.println("Ошибка при сохранении данных: " + e.getMessage());
+            e.printStackTrace();  // Выводим подробности ошибки
+        }
     }
 
     @Override
     public void updateSubtask(Subtask subtask) {
-        super.updateSubtask(subtask);
-        saveToFile();
+        try {
+            super.updateSubtask(subtask);
+            saveToFile();  // Сохраняем данные в файл
+        } catch (ManagerSaveException e) {
+            // Обработка исключения при сохранении данных
+            System.err.println("Ошибка при сохранении данных: " + e.getMessage());
+            e.printStackTrace();
+        } catch (Exception e) {
+            // Обработка других исключений, которые могут возникнуть при обновлении подзадачи
+            System.err.println("Ошибка при обновлении подзадачи: " + e.getMessage());
+            e.printStackTrace();  // Выводим стек-трейс для диагностики
+        }
     }
+
 
     @Override
     public void deleteTask(int id) {
-        super.deleteTask(id);
-        saveToFile();
+        try {
+            super.deleteTask(id);  // Вызываем родительский метод для удаления задачи
+            saveToFile();  // Сохраняем данные в файл
+        } catch (ManagerSaveException e) {
+            // Обработка исключения
+            System.err.println("Ошибка при сохранении данных: " + e.getMessage());
+            e.printStackTrace();  // Выводим стек-трейс для диагностики
+        } catch (Exception e) {
+            // Обработка других исключений
+            System.err.println("Ошибка при удалении задачи: " + e.getMessage());
+            e.printStackTrace();  // Выводим стек-трейс для диагностики
+        }
     }
+
 
     @Override
     public void deleteEpic(int id) {
-        super.deleteEpic(id);
-        saveToFile();
+        try {
+            super.deleteEpic(id);
+            saveToFile();  // Сохраняем данные в файл
+        } catch (ManagerSaveException e) {
+            System.err.println("Ошибка при сохранении данных: " + e.getMessage());
+            e.printStackTrace();
+        } catch (Exception e) {
+            // Обработка других исключений
+            System.err.println("Ошибка при удалении эпика: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
+
 
     @Override
     public void deleteSubtask(int id) {
-        super.deleteSubtask(id);
-        saveToFile();
+        try {
+            super.deleteSubtask(id);
+            saveToFile();
+        } catch (ManagerSaveException e) {
+            System.err.println("Ошибка при сохранении данных: " + e.getMessage());
+            e.printStackTrace();
+        } catch (Exception e) {
+            // Обработка других исключений
+            System.err.println("Ошибка при удалении подзадачи: " + e.getMessage());
+            e.printStackTrace();  // Выводим стек-трейс для диагностики
+        }
     }
 
     // Дополнительные методы для получения задач
-
-    @Override
     public List<Task> getTasks() {
         return super.getTasks();
     }
 
-    @Override
     public List<Epic> getEpics() {
         return super.getEpics();
     }
 
-    @Override
     public List<Subtask> getSubtasks() {
         return super.getSubtasks();
     }
 
-    @Override
     public Task getTask(int id) {
         return super.getTask(id);
     }
 
-    @Override
     public Subtask getSubtask(int id) {
         return super.getSubtask(id);
     }
 
-    @Override
     public Epic getEpic(int id) {
         return super.getEpic(id);
     }
@@ -260,24 +316,47 @@ public class FileBackedTaskManager extends InMemoryTaskManager implements TaskMa
 
     @Override
     public void deleteAllTasks() {
-        super.deleteAllTasks();
-        saveToFile(); // Сохраняем данные в файл
+        try {
+            super.deleteAllTasks();
+            saveToFile();  // Сохраняем данные
+        } catch (ManagerSaveException e) {
+            System.err.println("Ошибка при сохранении данных: " + e.getMessage());
+            e.printStackTrace();
+        } catch (Exception e) {
+            // Обработка других исключений
+            System.err.println("Ошибка при удалении всех задач: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 
     @Override
     public void deleteAllEpics() {
-        super.deleteAllEpics();
-        saveToFile(); // Сохраняем данные в файл
+        try {
+            super.deleteAllEpics();
+            saveToFile();
+        } catch (ManagerSaveException e) {
+            System.err.println("Ошибка при сохранении данных: " + e.getMessage());
+            e.printStackTrace();
+        } catch (Exception e) {
+            // Обработка других исключений
+            System.err.println("Ошибка при удалении всех эпиков: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
+
 
     @Override
     public void deleteAllSubtasks() {
-        super.deleteAllSubtasks();
-        saveToFile(); // Сохраняем данные в файл
+        try {
+            super.deleteAllSubtasks();
+            saveToFile();
+        } catch (ManagerSaveException e) {
+            System.err.println("Ошибка при сохранении данных: " + e.getMessage());
+            e.printStackTrace();
+        } catch (Exception e) {
+            // Обработка других исключений
+            System.err.println("Ошибка при удалении всех подзадач: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 }
-
-
-
-
-

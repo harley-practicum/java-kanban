@@ -58,31 +58,24 @@ public class Epic extends Task {
 
     @Override
     public String toString() {
-        // Возвращаем строку в формате CSV в порядке: id, title, description, status, type, subtasks.size()
+        return "Epic{" +
+                "id=" + id +
+                ", title='" + title + '\'' +
+                ", description='" + description + '\'' +
+                ", status=" + status +
+                ", subtasks=" + subtasks +
+                '}';
+    }
+
+        @Override
+        public String toCSV() {
         return id + "," +
-                title + "," +
-                description + "," +
-                status + "," +
                 type + "," +
-                subtasks.size(); // Добавляем количество подзадач
+                title + "," +
+                status + "," +
+                description + ",epic";
     }
 
-    // Метод для создания объекта Epic из строки
-    public static Epic fromString(String value) {
-        // Разбиваем строку на части
-        String[] fields = value.split(",");
-
-        // Получаем значения из строки
-        int id = Integer.parseInt(fields[0]);
-        String title = fields[1];
-        String description = fields[2];
-        Status status = Status.valueOf(fields[3]);
-
-        // Создаём объект Epic
-        Epic epic = new Epic(id, title, description, status);
-
-        // Возвращаем созданный объект Epic
-        return epic;
-    }
 }
+
 

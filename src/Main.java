@@ -12,7 +12,7 @@ public class Main {
         HistoryManager historyManager = new InMemoryHistoryManager();
         FileBackedTaskManager taskManager = null;
         try {
-            taskManager = new FileBackedTaskManager(historyManager);
+            taskManager = new FileBackedTaskManager(historyManager,"src/resources/tasks.csv");
         } catch (ManagerLoadException e) {
             System.err.println("Ошибка при загрузке данных: " + e.getMessage());
             return;

@@ -69,24 +69,20 @@ public class Task {
 
     @Override
     public String toString() {
-        // Форматируем объект в строку с полями в порядке: id, title, description, status, type
+        return "Task{" +
+                "id=" + id +
+                ", title='" + title + '\'' +
+                ", description='" + description + '\'' +
+                ", status=" + status +
+                '}';
+    }
+
+    public String toCSV() {
         return id + "," +
+                type + "," +
                 title + "," +
-                description + "," +
                 status + "," +
-                type;
+                description + ",task";
     }
 
-    public static Task fromString(String value) {
-        // Разбиваем строку на части
-        String[] fields = value.split(",");
-        int id = Integer.parseInt(fields[0]);
-        String title = fields[1];
-        String description = fields[2];
-        Status status = Status.valueOf(fields[3]);
-        TaskType type = TaskType.valueOf(fields[4]);
-
-        // Создаем объект задачи
-        return new Task(id, title, description, status);
-    }
 }

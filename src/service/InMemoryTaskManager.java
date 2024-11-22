@@ -14,7 +14,7 @@ public class InMemoryTaskManager implements TaskManager {
     protected final Map<Integer, Epic> epics = new HashMap<>(); // Эпики
     protected final Map<Integer, Subtask> subtasks = new HashMap<>(); // Подзадачи
     protected HistoryManager historyManager; // Менеджер истории
-    private int nextId = 1; // Счетчик для ID
+    protected int nextId = 1; // Счетчик для ID
 
     public InMemoryTaskManager(HistoryManager historyManager) {
         this.historyManager = historyManager;
@@ -44,7 +44,7 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public Integer addNewSubtask(Subtask subtask) {
+    public int addNewSubtask(Subtask subtask) {
         if (subtask == null) {
             throw new IllegalArgumentException("Подзадача не может быть null.");
         }

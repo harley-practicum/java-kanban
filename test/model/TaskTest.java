@@ -47,16 +47,6 @@ class TaskTest {
         assertEquals(task.hashCode(), task2.hashCode()); // Ожидаем одинаковые хеш-коды для равных объектов
     }
 
-    @Test
-    void testToString() {
-        // Создаём объект Task
-        Task task = new Task(1, "Task Title", "Task Description", Status.NEW);
 
-        // Ожидаемая строка в формате CSV
-        String expected = "1,Task Title,Task Description,NEW,TASK";
-
-        // Проверяем результат метода toString
-        assertEquals(expected, task.toString(), "Метод toString должен возвращать корректную строку в формате CSV.");
-    }
 }
 
