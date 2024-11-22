@@ -82,7 +82,7 @@ public class Task {
                 type + "," +
                 title + "," +
                 status + "," +
-                description ;
+                description;
     }
 
 }
