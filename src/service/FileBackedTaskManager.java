@@ -113,84 +113,51 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     private void saveToFile() {
         // Используем try-with-resources для записи в файл
         try (BufferedWriter writer = Files.newBufferedWriter(Paths.get(filePath))) {
+            // Записываем заголовок
             writer.write("ID,TYPE,NAME,STATUS,DESCRIPTION,EPIC");
             writer.newLine();
 
             // Сохраняем все задачи
-            for (Task task : super.getTasks()) {  // Используем метод родителя для получения задач
-                if (task != null) {
-                    writer.write(task.toCSV());
-                    writer.newLine();
-                }
+            for (Task task : super.getTasks()) { // Используем метод родителя для получения задач
+                writer.write(task.toCSV());
+                writer.newLine();
             }
 
             // Сохраняем все эпики
-            for (Epic epic : super.getEpics()) {  // Используем метод родителя для получения эпиков
-                if (epic != null) {
-                    writer.write(epic.toCSV());
-                    writer.newLine();
-                }
+            for (Epic epic : super.getEpics()) { // Используем метод родителя для получения эпиков
+                writer.write(epic.toCSV());
+                writer.newLine();
             }
 
-            // Сохраняем подзадачи, привязанные к эпику
-            for (Subtask subtask : super.getSubtasks()) {  // Используем метод родителя для получения подзадач
-                if (subtask != null) {
-                    // Проверка существования эпика с данным ID
-                    boolean epicExists = super.getEpics().stream()
-                            .anyMatch(epic -> epic.getId() == subtask.getEpicId());
-
-                    if (epicExists) {
-                        writer.write(subtask.toCSV());
-                        writer.newLine();
-                    } else {
-                        // Если эпик не найден, выбрасываем исключение
-                        throw new IllegalArgumentException("Эпик с ID " + subtask.getEpicId() + " не существует!");
-                    }
-                }
+            // Сохраняем все подзадачи
+            for (Subtask subtask : super.getSubtasks()) { // Используем метод родителя для получения подзадач
+                writer.write(subtask.toCSV());
+                writer.newLine();
             }
-
         } catch (IOException e) {
-            // Выбрасываем исключение ManagerSaveException при ошибке записи в файл
-            throw new ManagerSaveException("Ошибка записи в файл: " + e.getMessage(), e);
+            throw new RuntimeException("Ошибка при записи данных в файл: " + filePath, e);
         }
     }
 
     @Override
     public int addNewTask(Task task) {
         int id = super.addNewTask(task);
-        try {
-            saveToFile();
-        } catch (ManagerSaveException e) {
-            // Обрабатываем ошибку при сохранении
-            System.err.println("Ошибка при сохранении данных: " + e.getMessage());
-            e.printStackTrace();
-        }
+        saveToFile(); // Убираем обработку исключений
         return id;
     }
 
     @Override
     public int addNewEpic(Epic epic) {
         int id = super.addNewEpic(epic);
-        try {
-            saveToFile();  // Сохраняем данные в файл
-        } catch (ManagerSaveException e) {
-            // Обрабатываем ошибку при сохранении
-            System.err.println("Ошибка при сохранении данных: " + e.getMessage());
-            e.printStackTrace();
-        }
+        saveToFile(); // Убираем обработку исключений
         return id;
     }
+
 
     @Override
     public int addNewSubtask(Subtask subtask) {
         int id = super.addNewSubtask(subtask); // Вызываем родительский метод
-        try {
-            saveToFile();  // Сохраняем данные в файл
-        } catch (ManagerSaveException e) {
-            // Обрабатываем ошибку при сохранении
-            System.err.println("Ошибка при сохранении данных: " + e.getMessage());
-            e.printStackTrace();
-        }
+        saveToFile(); // Убираем обработку исключений
         return id;
     }
 
@@ -234,52 +201,24 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         }
     }
 
-
     @Override
     public void deleteTask(int id) {
-        try {
-            super.deleteTask(id);  // Вызываем родительский метод для удаления задачи
-            saveToFile();  // Сохраняем данные в файл
-        } catch (ManagerSaveException e) {
-            // Обработка исключения
-            System.err.println("Ошибка при сохранении данных: " + e.getMessage());
-            e.printStackTrace();  // Выводим стек-трейс для диагностики
-        } catch (Exception e) {
-            // Обработка других исключений
-            System.err.println("Ошибка при удалении задачи: " + e.getMessage());
-            e.printStackTrace();  // Выводим стек-трейс для диагностики
-        }
+        super.deleteTask(id);  // Вызываем родительский метод для удаления задачи
+        saveToFile();  // Сохраняем данные в файл
     }
 
     @Override
     public void deleteEpic(int id) {
-        try {
-            super.deleteEpic(id);
-            saveToFile();  // Сохраняем данные в файл
-        } catch (ManagerSaveException e) {
-            System.err.println("Ошибка при сохранении данных: " + e.getMessage());
-            e.printStackTrace();
-        } catch (Exception e) {
-            // Обработка других исключений
-            System.err.println("Ошибка при удалении эпика: " + e.getMessage());
-            e.printStackTrace();
-        }
+        super.deleteEpic(id);  // Вызываем родительский метод для удаления эпика
+        saveToFile();  // Сохраняем данные в файл
     }
 
     @Override
     public void deleteSubtask(int id) {
-        try {
-            super.deleteSubtask(id);
-            saveToFile();
-        } catch (ManagerSaveException e) {
-            System.err.println("Ошибка при сохранении данных: " + e.getMessage());
-            e.printStackTrace();
-        } catch (Exception e) {
-            // Обработка других исключений
-            System.err.println("Ошибка при удалении подзадачи: " + e.getMessage());
-            e.printStackTrace();  // Выводим стек-трейс для диагностики
-        }
+        super.deleteSubtask(id);  // Вызываем родительский метод
+        saveToFile();  // Сохраняем данные в файл
     }
+
 
     // Дополнительные методы для получения задач
     public List<Task> getTasks() {
@@ -312,47 +251,20 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 
     @Override
     public void deleteAllTasks() {
-        try {
-            super.deleteAllTasks();
-            saveToFile();  // Сохраняем данные
-        } catch (ManagerSaveException e) {
-            System.err.println("Ошибка при сохранении данных: " + e.getMessage());
-            e.printStackTrace();
-        } catch (Exception e) {
-            // Обработка других исключений
-            System.err.println("Ошибка при удалении всех задач: " + e.getMessage());
-            e.printStackTrace();
-        }
+        super.deleteAllTasks();  // Вызываем родительский метод для удаления всех задач
+        saveToFile();  // Сохраняем данные в файл
     }
 
     @Override
     public void deleteAllEpics() {
-        try {
-            super.deleteAllEpics();
-            saveToFile();
-        } catch (ManagerSaveException e) {
-            System.err.println("Ошибка при сохранении данных: " + e.getMessage());
-            e.printStackTrace();
-        } catch (Exception e) {
-            // Обработка других исключений
-            System.err.println("Ошибка при удалении всех эпиков: " + e.getMessage());
-            e.printStackTrace();
-        }
+        super.deleteAllEpics();  // Вызываем родительский метод для удаления всех эпиков
+        saveToFile();  // Сохраняем данные в файл
     }
-
 
     @Override
     public void deleteAllSubtasks() {
-        try {
-            super.deleteAllSubtasks();
-            saveToFile();
-        } catch (ManagerSaveException e) {
-            System.err.println("Ошибка при сохранении данных: " + e.getMessage());
-            e.printStackTrace();
-        } catch (Exception e) {
-            // Обработка других исключений
-            System.err.println("Ошибка при удалении всех подзадач: " + e.getMessage());
-            e.printStackTrace();
-        }
+        super.deleteAllSubtasks();
+        saveToFile();  // Сохраняем данные в файл
     }
+
 }
