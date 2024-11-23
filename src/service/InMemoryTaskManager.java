@@ -5,6 +5,7 @@ import model.Status;
 import model.Subtask;
 import model.Task;
 
+import java.io.IOException;
 import java.util.*;
 
 
@@ -25,7 +26,7 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public int addNewTask(Task task) {
+    public int addNewTask(Task task) throws IOException {
         if (task == null) {
             throw new IllegalArgumentException("Task не может быть null.");
         }
@@ -36,7 +37,7 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public int addNewEpic(Epic epic) {
+    public int addNewEpic(Epic epic) throws IOException {
         if (epic == null) {
             throw new IllegalArgumentException("Эпик не может быть null.");
         }
@@ -48,7 +49,7 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public int addNewSubtask(Subtask subtask) {
+    public int addNewSubtask(Subtask subtask) throws IOException {
         if (subtask == null) {
             throw new IllegalArgumentException("Подзадача не может быть null.");
         }
@@ -169,7 +170,7 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public void updateTask(Task task) {
+    public void updateTask(Task task) throws IOException {
         // Проверяем, существует ли задача с заданным ID
         if (task == null || !tasks.containsKey(task.getId())) {
             throw new NoSuchElementException("Task c id " + task.getId() + " не существует.");
@@ -178,7 +179,7 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public void updateEpic(Epic epic) {
+    public void updateEpic(Epic epic) throws IOException {
         // Проверяем, существует ли эпик с заданным ID
         if (epic == null || !epics.containsKey(epic.getId())) {
             throw new NoSuchElementException("Эпик с ID "  + epic.getId() +  "не существует.");
@@ -191,7 +192,7 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public void updateSubtask(Subtask subtask) {
+    public void updateSubtask(Subtask subtask) throws IOException {
         if (subtask == null || !subtasks.containsKey(subtask.getId())) {
             throw new NoSuchElementException("Подзадача с ID " + subtask.getId() + " не существует.");
         }
@@ -212,7 +213,7 @@ public class InMemoryTaskManager implements TaskManager {
 
 
     @Override
-    public void deleteTask(int id) {
+    public void deleteTask(int id) throws IOException {
         if (!tasks.containsKey(id)) {
             throw new NoSuchElementException("Задача с ID " + id + " не существует.");
         }
@@ -221,7 +222,7 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public void deleteSubtask(int id) {
+    public void deleteSubtask(int id) throws IOException {
         if (!subtasks.containsKey(id)) {
             throw new NoSuchElementException("Подзадача с id " + id + " не существует.");
         }
@@ -237,7 +238,7 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public void deleteEpic(int id) {
+    public void deleteEpic(int id) throws IOException {
         // Получаем эпик по ID
         Epic epic = epics.get(id);
         if (epic == null) { // Проверяем, существует ли эпик
@@ -256,7 +257,7 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public void deleteAllTasks() {
+    public void deleteAllTasks() throws IOException {
         if (tasks.isEmpty()) { // Проверяем, есть ли задачи
             System.out.println("Нет задач для удаления.");
             return;
@@ -274,7 +275,7 @@ public class InMemoryTaskManager implements TaskManager {
 
 
     @Override
-    public void deleteAllEpics() {
+    public void deleteAllEpics() throws IOException {
         if (epics.isEmpty()) { // Проверяем, есть ли эпики в коллекции
             System.out.println("Нет эпиков для удаления.");
             return;
@@ -298,7 +299,7 @@ public class InMemoryTaskManager implements TaskManager {
 
 
     @Override
-    public void deleteAllSubtasks() {
+    public void deleteAllSubtasks() throws IOException {
         if (subtasks.isEmpty()) {
             System.out.println("Нет подзадач для удаления."); // Сообщаем, если подзадач нет
             return;
