@@ -32,7 +32,7 @@ class FileBackedTaskManagerTest {
     }
 
     @Test // прошу скажите что еще не исправил? или как развернуть их на гитхабе и посмотреть все...?
-    void testSaveAndLoadFromFile() {
+    void testSaveAndLoadFromFile() throws IOException {
         // Указываем путь к тестовому файлу
         Path filePath = Paths.get("src/resources/test_tasks.csv");
         File file = filePath.toFile(); // Преобразуем Path в File
@@ -61,6 +61,7 @@ class FileBackedTaskManagerTest {
         FileBackedTaskManager loadedManager = FileBackedTaskManager.loadFromFile(file);
 
         // Проверяем, что все задачи восстановились корректно
+        assert loadedManager != null;
         Task loadedTask = loadedManager.getTask(1);
         Epic loadedEpic = loadedManager.getEpic(2);
         Subtask loadedSubtask = loadedManager.getSubtask(3);

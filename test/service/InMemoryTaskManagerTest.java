@@ -5,6 +5,8 @@ import model.Subtask;
 import model.Task;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import java.io.IOException;
 import java.util.List;
 import java.util.NoSuchElementException;
 import static org.junit.jupiter.api.Assertions.*;
@@ -13,7 +15,7 @@ class InMemoryTaskManagerTest {
     private InMemoryTaskManager taskManager;
 
     @BeforeEach
-    void setUp() {
+    void setUp() throws IOException {
         taskManager = new InMemoryTaskManager(new InMemoryHistoryManager()); // Инициализируем менеджер задач с историей
         // Очистка всех задач
         taskManager.deleteAllTasks();
@@ -21,7 +23,7 @@ class InMemoryTaskManagerTest {
         taskManager.deleteAllSubtasks();
     }
     @Test
-    void simpleTestForSubtaskId() {
+    void simpleTestForSubtaskId() throws IOException {
         Epic epic = new Epic(0, "Simple Epic", "Simple Description", Status.NEW);
         int epicId = taskManager.addNewEpic(epic);
 
@@ -33,7 +35,7 @@ class InMemoryTaskManagerTest {
     }
 
     @Test
-    void addNewTask_ShouldAddTaskAndReturnId() {
+    void addNewTask_ShouldAddTaskAndReturnId() throws IOException {
         Task task = new Task(0, "Task Title", "Task Description", Status.NEW);
         int taskId = taskManager.addNewTask(task);
         assertEquals(1, taskId); // ID должен быть 1
@@ -41,7 +43,7 @@ class InMemoryTaskManagerTest {
     }
 
     @Test
-    void deleteEpic_ShouldRemoveEpicAndItsSubtasks() {
+    void deleteEpic_ShouldRemoveEpicAndItsSubtasks() throws IOException {
         // Создаем эпик с необходимыми параметрами
         Epic epic = new Epic(0, "Epic Title", "Epic Description", Status.NEW);
         int epicId = taskManager.addNewEpic(epic);
@@ -62,7 +64,7 @@ class InMemoryTaskManagerTest {
     }
 
     @Test
-    void addNewSubtask_ShouldAddSubtaskAndUpdateEpic() {
+    void addNewSubtask_ShouldAddSubtaskAndUpdateEpic() throws IOException {
         Epic epic = new Epic(0, "Epic Title", "Epic Description", Status.NEW); // Создание эпика с 4 аргументами
         int epicId = taskManager.addNewEpic(epic);
 
@@ -78,7 +80,7 @@ class InMemoryTaskManagerTest {
 
 
     @Test
-    void deleteTask_ShouldRemoveTask() {
+    void deleteTask_ShouldRemoveTask() throws IOException {
         Task task = new Task(0, "Task Title", "Task Description", Status.NEW);
         int taskId = taskManager.addNewTask(task);
         taskManager.deleteTask(taskId);
@@ -88,7 +90,7 @@ class InMemoryTaskManagerTest {
     }
 
     @Test
-    void updateTask_ShouldUpdateTask() {
+    void updateTask_ShouldUpdateTask() throws IOException {
         Task task = new Task(0, "Task Title", "Task Description", Status.NEW);
         int taskId = taskManager.addNewTask(task);
 
@@ -100,7 +102,7 @@ class InMemoryTaskManagerTest {
     }
 
     @Test
-    void updateEpic_ShouldUpdateEpic() {
+    void updateEpic_ShouldUpdateEpic() throws IOException {
         // Создаем эпик с 4 аргументами, включая статус
         Epic epic = new Epic(0, "Epic Title", "Epic Description", Status.NEW);
         int epicId = taskManager.addNewEpic(epic);
@@ -115,7 +117,7 @@ class InMemoryTaskManagerTest {
     }
 
     @Test
-    void updateSubtask_ShouldUpdateSubtask() {
+    void updateSubtask_ShouldUpdateSubtask() throws IOException {
         // Создаем эпик с 4 аргументами, включая статус
         Epic epic = new Epic(0, "Epic Title", "Epic Description", Status.NEW);
         int epicId = taskManager.addNewEpic(epic);
@@ -135,7 +137,7 @@ class InMemoryTaskManagerTest {
 
 
     @Test
-    void getTasks_ShouldReturnAllTasks() {
+    void getTasks_ShouldReturnAllTasks() throws IOException {
         Task task1 = new Task(0, "Task 1", "Description 1", Status.NEW);
         Task task2 = new Task(0, "Task 2", "Description 2", Status.NEW);
         taskManager.addNewTask(task1);
@@ -146,7 +148,7 @@ class InMemoryTaskManagerTest {
     }
 
     @Test
-    void getEpics_ShouldReturnAllEpics() {
+    void getEpics_ShouldReturnAllEpics() throws IOException {
         // Создаем эпики с необходимыми параметрами, включая статус
         Epic epic1 = new Epic(0, "Epic 1", "Description 1", Status.NEW);
         Epic epic2 = new Epic(0, "Epic 2", "Description 2", Status.NEW);
@@ -160,7 +162,7 @@ class InMemoryTaskManagerTest {
 
 
     @Test
-    void getSubtasks_ShouldReturnAllSubtasks() {
+    void getSubtasks_ShouldReturnAllSubtasks() throws IOException {
         Epic epic = new Epic(0, "Epic Title", "Epic Description", Status.NEW);
         int epicId = taskManager.addNewEpic(epic);
 
@@ -181,7 +183,7 @@ class InMemoryTaskManagerTest {
 
 
     @Test
-    void deleteAllTasks_ShouldClearAllTasks() {
+    void deleteAllTasks_ShouldClearAllTasks() throws IOException {
         Task task = new Task(0, "Task Title", "Task Description", Status.NEW);
         taskManager.addNewTask(task);
         taskManager.deleteAllTasks();
@@ -190,7 +192,7 @@ class InMemoryTaskManagerTest {
     }
 
     @Test
-    void deleteAllEpics_ShouldClearAllEpics() {
+    void deleteAllEpics_ShouldClearAllEpics() throws IOException {
         // Создаем эпик с необходимыми параметрами, включая статус
         Epic epic = new Epic(0, "Epic Title", "Epic Description", Status.NEW);
         taskManager.addNewEpic(epic);
@@ -201,7 +203,7 @@ class InMemoryTaskManagerTest {
 
 
     @Test
-    void deleteAllSubtasks_ShouldClearAllSubtasks() {
+    void deleteAllSubtasks_ShouldClearAllSubtasks() throws IOException {
         // Создаем эпик с необходимыми параметрами, включая статус
         Epic epic = new Epic(0, "Epic Title", "Epic Description", Status.NEW);
         int epicId = taskManager.addNewEpic(epic);

@@ -20,16 +20,12 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 
     // Метод для загрузки данных из файла
     public static FileBackedTaskManager loadFromFile(File file) {
-        // Проверяем, существует ли файл
         if (!file.exists()) {
             System.err.println("Файл не найден: " + file.getPath());
             return null;
         }
 
-        // Получаем дефолтный historyManager
         HistoryManager historyManager = Managers.getDefaultHistory();
-
-        // Создаём менеджер с пустым historyManager
         FileBackedTaskManager manager = new FileBackedTaskManager(historyManager, file.getPath());
 
         try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
@@ -38,66 +34,51 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
             // Пропускаем первую строку (заголовок)
             reader.readLine();
 
-            // Чтение остальных строк из файла
             while ((line = reader.readLine()) != null) {
                 if (line.trim().isEmpty()) {
-                    continue; // Пропускаем пустые строки
+                    continue;
                 }
 
                 String[] fields = line.split(",");
                 System.out.println("Чтение строки: " + line);
                 System.out.println("Разделённые данные: " + Arrays.toString(fields));
 
-                if (fields.length < 5) {
+                if (fields.length < 6) {
                     System.err.println("Неверное количество данных в строке: " + line);
                     continue;
                 }
 
-                try {
-                    // Парсим данные с учётом вашей очередности
-                    int id = Integer.parseInt(fields[0]);          // ID задачи
-                    TaskType taskType = TaskType.valueOf(fields[1]); // Тип задачи
-                    String title = fields[2];                     // Название задачи
-                    Status status = Status.valueOf(fields[3]);    // Статус задачи
-                    String description = fields[4];              // Описание задачи
+                int id = Integer.parseInt(fields[0]);          // ID задачи
+                TaskType taskType = TaskType.valueOf(fields[1]); // Тип задачи
+                String title = fields[2];                     // Название задачи
+                Status status = Status.valueOf(fields[3]);    // Статус задачи
+                String description = fields[4];              // Описание задачи
 
-                    switch (taskType) {
-                        case TASK:
-                            Task task = new Task(id, title, description, status);
-                            manager.tasks.put(task.getId(), task);
-                            break;
+                switch (taskType) {
+                    case TASK:
+                        Task task = new Task(id, title, description, status);
+                        manager.tasks.put(task.getId(), task);
+                        break;
 
-                        case EPIC:
-                            Epic epic = new Epic(id, title, description, status);
-                            manager.epics.put(epic.getId(), epic);
-                            break;
+                    case EPIC:
+                        Epic epic = new Epic(id, title, description, status);
+                        manager.epics.put(epic.getId(), epic);
+                        break;
 
-                        case SUBTASK:
-                            if (fields.length < 6) {
-                                System.err.println("Подзадача должна содержать ID эпика, пропуск строки.");
-                                continue;
-                            }
-                            int epicId = Integer.parseInt(fields[5]); // ID эпика
-                            Subtask subtask = new Subtask(id, title, description, status, epicId);
-                            manager.subtasks.put(subtask.getId(), subtask);
+                    case SUBTASK:
+                        int epicId = Integer.parseInt(fields[5]); // ID эпика
+                        Subtask subtask = new Subtask(id, title, description, status, epicId);
+                        manager.subtasks.put(subtask.getId(), subtask);
 
-                            Epic parentEpic = manager.epics.get(subtask.getEpicId());
-                            if (parentEpic != null) {
-                                parentEpic.addSubtask(subtask);
-                            } else {
-                                System.err.println("Не найден эпик с ID: " + subtask.getEpicId());
-                            }
-                            break;
+                        Epic parentEpic = manager.epics.get(subtask.getEpicId());
+                        if (parentEpic != null) {
+                            parentEpic.addSubtask(subtask);
+                        }
+                        break;
 
-                        default:
-                            System.err.println("Неизвестный тип задачи: " + taskType);
-                            break;
-                    }
-
-                } catch (NumberFormatException e) {
-                    System.err.println("Ошибка формата числа для ID: " + line + " — " + e.getMessage());
-                } catch (IllegalArgumentException e) {
-                    System.err.println("Ошибка обработки строки: " + line + " — " + e.getMessage());
+                    default:
+                        System.err.println("Неизвестный тип задачи: " + taskType);
+                        break;
                 }
             }
         } catch (IOException e) {
@@ -107,6 +88,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         System.out.println("Данные успешно загружены из файла.");
         return manager;
     }
+
 
     // Метод для сохранения данных в файл
     private void saveToFile() throws IOException {
@@ -135,8 +117,6 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
             writer.newLine();
         }
     }
-
-
 
     @Override
     public int addNewTask(Task task) throws IOException {
@@ -170,7 +150,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         super.updateEpic(epic);
         saveToFile();
     }
-    
+
     @Override
     public void updateSubtask(Subtask subtask) throws IOException {
         super.updateSubtask(subtask);

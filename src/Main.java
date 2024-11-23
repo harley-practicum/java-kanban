@@ -5,10 +5,11 @@ import service.FileBackedTaskManager;
 import service.HistoryManager;
 import service.InMemoryHistoryManager;
 
+import java.io.IOException;
 import java.util.Scanner;
 
 public class Main {
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         HistoryManager historyManager = new InMemoryHistoryManager();
         FileBackedTaskManager taskManager = null;
         try {
