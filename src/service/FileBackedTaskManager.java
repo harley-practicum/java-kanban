@@ -3,11 +3,11 @@ package service;
 import exception.ManagerLoadException;
 import exception.ManagerSaveException;
 import model.*;
+
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Arrays;
-import java.util.List;
 
 public class FileBackedTaskManager extends InMemoryTaskManager {
 
@@ -153,7 +153,6 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         return id;
     }
 
-
     @Override
     public int addNewSubtask(Subtask subtask) {
         int id = super.addNewSubtask(subtask); // Вызываем родительский метод
@@ -219,36 +218,6 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         saveToFile();  // Сохраняем данные в файл
     }
 
-
-    // Дополнительные методы для получения задач
-    public List<Task> getTasks() {
-        return super.getTasks();
-    }
-
-    public List<Epic> getEpics() {
-        return super.getEpics();
-    }
-
-    public List<Subtask> getSubtasks() {
-        return super.getSubtasks();
-    }
-
-    public Task getTask(int id) {
-        return super.getTask(id);
-    }
-
-    public Subtask getSubtask(int id) {
-        return super.getSubtask(id);
-    }
-
-    public Epic getEpic(int id) {
-        return super.getEpic(id);
-    }
-
-    public List<Task> getHistory() {
-        return super.getHistory();
-    }
-
     @Override
     public void deleteAllTasks() {
         super.deleteAllTasks();  // Вызываем родительский метод для удаления всех задач
@@ -266,5 +235,4 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         super.deleteAllSubtasks();
         saveToFile();  // Сохраняем данные в файл
     }
-
 }
