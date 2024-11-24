@@ -1,12 +1,10 @@
 package service;
 
-import exception.ManagerLoadException;
 import model.*;
 
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.Arrays;
 
 public class FileBackedTaskManager extends InMemoryTaskManager {
 
@@ -19,14 +17,12 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 
 
     // Метод для загрузки данных из файла
-    public static FileBackedTaskManager loadFromFile(File file) {
-        if (!file.exists()) {
-            System.err.println("Файл не найден: " + file.getPath());
-            return null;
-        }
 
+    public static FileBackedTaskManager loadFromFile(File file) {
         HistoryManager historyManager = Managers.getDefaultHistory();
         FileBackedTaskManager manager = new FileBackedTaskManager(historyManager, file.getPath());
+
+        int maxId = 0;  // Переменная для отслеживания максимального ID из файла
 
         try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
             String line;
@@ -40,35 +36,35 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                 }
 
                 String[] fields = line.split(",");
-                System.out.println("Чтение строки: " + line);
-                System.out.println("Разделённые данные: " + Arrays.toString(fields));
 
-                if (fields.length < 6) {
-                    System.err.println("Неверное количество данных в строке: " + line);
-                    continue;
-                }
+                int id = Integer.parseInt(fields[0]);  // Получаем ID из файла
+                maxId = Math.max(maxId, id);  // Обновляем максимальный ID
 
-                int id = Integer.parseInt(fields[0]);          // ID задачи
                 TaskType taskType = TaskType.valueOf(fields[1]); // Тип задачи
-                String title = fields[2];                     // Название задачи
-                Status status = Status.valueOf(fields[3]);    // Статус задачи
-                String description = fields[4];              // Описание задачи
+                String title = fields[2];                       // Название задачи
+                Status status = Status.valueOf(fields[3]);      // Статус задачи
+                String description = fields[4];                 // Описание задачи
 
                 switch (taskType) {
                     case TASK:
-                        Task task = new Task(id, title, description, status);
-                        manager.tasks.put(task.getId(), task);
+                        // Используем getNextId() для задания ID
+                        Task task = new Task(manager.getNextId(), title, description, status);
+                        manager.addNewTask(task);
+
                         break;
 
                     case EPIC:
-                        Epic epic = new Epic(id, title, description, status);
-                        manager.epics.put(epic.getId(), epic);
+                        // Используем getNextId() для задания ID
+                        Epic epic = new Epic(manager.getNextId(), title, description, status);
+                        manager.addNewTask(epic);
                         break;
 
                     case SUBTASK:
                         int epicId = Integer.parseInt(fields[5]); // ID эпика
-                        Subtask subtask = new Subtask(id, title, description, status, epicId);
-                        manager.subtasks.put(subtask.getId(), subtask);
+                        // Используем getNextId() для задания ID
+                        Subtask subtask = new Subtask(manager.getNextId(), title, description, status, epicId);
+                        manager.addNewTask(subtask);  // Добавляем подзадачу
+
 
                         Epic parentEpic = manager.epics.get(subtask.getEpicId());
                         if (parentEpic != null) {
@@ -82,13 +78,15 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                 }
             }
         } catch (IOException e) {
-            throw new ManagerLoadException("Ошибка при загрузке данных из файла", e);
+            System.err.println("Ошибка при загрузке данных из файла: " + e.getMessage());
         }
+
+        // Устанавливаем nextId в качестве maxId + 1
+        manager.nextId = maxId + 1;  // Следующий ID будет maxId + 1
 
         System.out.println("Данные успешно загружены из файла.");
         return manager;
     }
-
 
     // Метод для сохранения данных в файл
     private void saveToFile() throws IOException {
@@ -121,7 +119,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     @Override
     public int addNewTask(Task task) throws IOException {
         int id = super.addNewTask(task);
-        saveToFile(); // Убираем обработку исключений
+        saveToFile();
         return id;
     }
 
@@ -134,8 +132,8 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 
     @Override
     public int addNewSubtask(Subtask subtask) throws IOException {
-        int id = super.addNewSubtask(subtask); // Вызываем родительский метод
-        saveToFile(); // Убираем обработку исключений
+        int id = super.addNewSubtask(subtask);
+        saveToFile();
         return id;
     }
 

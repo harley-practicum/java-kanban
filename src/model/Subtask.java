@@ -6,6 +6,10 @@ public class Subtask extends Task {
 
     private int epicId; // ID эпика, к которому относится подзадача
 
+    public void setEpicId(int epicId) {
+        this.epicId = epicId;
+    }
+
     // Конструктор
     public Subtask(int id, String title, String description, Status status, int epicId) {
         super(id, title, description, status);

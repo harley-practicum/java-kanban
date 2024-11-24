@@ -15,6 +15,8 @@ public class InMemoryTaskManager implements TaskManager {
     protected final Map<Integer, Epic> epics = new HashMap<>(); // Эпики
     protected final Map<Integer, Subtask> subtasks = new HashMap<>(); // Подзадачи
     protected HistoryManager historyManager; // Менеджер истории
+
+
     protected int nextId = 1; // Счетчик для ID
 
     public InMemoryTaskManager(HistoryManager historyManager) {
@@ -25,12 +27,17 @@ public class InMemoryTaskManager implements TaskManager {
         this.historyManager = Managers.getDefaultHistory();
     }
 
+    protected int getNextId() {
+        return nextId++;
+    }
+
     @Override
     public int addNewTask(Task task) throws IOException {
         if (task == null) {
             throw new IllegalArgumentException("Task не может быть null.");
         }
-        int id = nextId++; // Получаем следующий уникальный ID
+
+        int id = getNextId(); // Получаем следующий уникальный ID
         task.setId(id); // Устанавливаем уникальный ID для задачи
         tasks.put(id, task); // Сохраняем задачу в коллекции
         return id; // Возвращаем ID добавленной задачи
@@ -42,7 +49,7 @@ public class InMemoryTaskManager implements TaskManager {
             throw new IllegalArgumentException("Эпик не может быть null.");
         }
 
-        int id = nextId++; // Получаем следующий уникальный ID
+        int id = getNextId(); // Получаем следующий уникальный ID
         epic.setId(id); // Устанавливаем уникальный ID для эпика
         epics.put(id, epic); // Сохраняем эпик в коллекции
         return id; // Возвращаем ID добавленного эпика
@@ -65,7 +72,7 @@ public class InMemoryTaskManager implements TaskManager {
             throw new IllegalArgumentException("Подзадача с ID " + subtask.getId() + " уже существует.");
         }
 
-        int id = nextId++; // Устанавливаем id и добавляем подзадачу в хранилище
+        int id = getNextId(); // Устанавливаем id и добавляем подзадачу в хранилище
         subtask.setId(id);
         subtasks.put(id, subtask);
         epic.addSubtask(subtask); // Добавляем ID подзадачи в эпик
