@@ -2,29 +2,24 @@ package model;
 
 public class Task {
 
-    protected int id; // Уникальный ID задачи
+    protected int id;
     protected String title; // Название задач
-    protected String description; // Описание задачи
+    protected String description;
     protected Status status; // Статус задачи
+    protected TaskType type; // Тип задачи
 
+    // Конструктор
     public Task(int id, String title, String description, Status status) {
         this.id = id;
         this.title = title;
         this.description = description;
         this.status = status;
+        this.type = TaskType.TASK; // Тип задачи по умолчанию
     }
 
     // Геттеры и сеттеры
     public Integer getId() {
         return id;
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
     }
 
     public void setId(int id) {
@@ -35,8 +30,16 @@ public class Task {
         return title;
     }
 
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
     public String getDescription() {
         return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public Status getStatus() {
@@ -47,8 +50,11 @@ public class Task {
         this.status = status;
     }
 
-    @Override
+    public TaskType getType() {
+        return type; // Возвращаем тип задачи
+    }
 
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true; // Сравнение ссылок
         if (!(o instanceof Task)) return false; // Проверка на тип
@@ -58,7 +64,7 @@ public class Task {
 
     @Override
     public int hashCode() {
-        return Integer.hashCode(id); // Теперь хеш-код зависит только от id
+        return Integer.hashCode(id); // Хеш-код зависит только от id
     }
 
     @Override
@@ -70,4 +76,13 @@ public class Task {
                 ", status=" + status +
                 '}';
     }
+
+    public String toCSV() {
+        return id + "," +
+                type + "," +
+                title + "," +
+                status + "," +
+                description;
+    }
+
 }

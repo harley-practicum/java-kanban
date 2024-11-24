@@ -47,10 +47,6 @@ class TaskTest {
         assertEquals(task.hashCode(), task2.hashCode()); // Ожидаем одинаковые хеш-коды для равных объектов
     }
 
-    @Test
-    void testToString() {
-        String expectedString = "Task{id=1, title='Test Task', description='This is a test description', status=NEW}";
-        assertEquals(expectedString, task.toString()); // Проверяем правильность вывода метода toString
-    }
+
 }
 

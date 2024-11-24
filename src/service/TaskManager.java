@@ -4,6 +4,7 @@ import model.Epic;
 import model.Subtask;
 import model.Task;
 
+import java.io.IOException;
 import java.util.List;
 
 public interface TaskManager {
@@ -22,30 +23,30 @@ public interface TaskManager {
 
     Epic getEpic(int id);
 
-    int addNewTask(Task task);
+    int addNewTask(Task task) throws IOException;
 
-    int addNewEpic(Epic epic);
+    int addNewEpic(Epic epic) throws IOException;
 
-    Integer addNewSubtask(Subtask subtask);
+    int addNewSubtask(Subtask subtask) throws IOException;
 
-    void deleteEpic(int id);
+    void deleteEpic(int id) throws IOException;
 
-    void updateTask(Task task);
+    void updateTask(Task task) throws IOException;
 
-    void updateEpic(Epic epic);
+    void updateEpic(Epic epic) throws IOException;
 
-    void updateSubtask(Subtask subtask);
+    void updateSubtask(Subtask subtask) throws IOException;
 
-    void deleteTask(int id);
+    void deleteTask(int id) throws IOException;
 
-    void deleteSubtask(int id);
+    void deleteSubtask(int id) throws IOException;
 
     List<Task> getHistory();
 
-    void deleteAllTasks();
+    void deleteAllTasks() throws IOException;
 
-    void deleteAllEpics();
+    void deleteAllEpics() throws IOException;
 
-    void deleteAllSubtasks();
+    void deleteAllSubtasks() throws IOException;
 
 }

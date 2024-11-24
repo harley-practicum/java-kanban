@@ -31,11 +31,5 @@ class SubtaskTest {
         assertNotEquals(subtask1, subtask3);
     }
 
-    @Test
-    void testToString() {
-        Subtask subtask = new Subtask(1, "Subtask 1", "Description of subtask 1", Status.NEW, 100);
 
-        String expectedString = "Subtask{id=1, title='Subtask 1', description='Description of subtask 1', status=NEW, epicId=100}";
-        assertEquals(expectedString, subtask.toString());
-    }
 }

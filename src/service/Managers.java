@@ -1,17 +1,18 @@
 package service;
+
 public class Managers {
+
     // Метод для получения экземпляра TaskManager
     public static TaskManager getDefault() {
-
         HistoryManager historyManager = getDefaultHistory();
-
-        return new InMemoryTaskManager(historyManager);
+        return new FileBackedTaskManager(historyManager, "src/resources/tasks.csv"); // Передаем historyManager и путь к файлу
     }
 
     // Метод для получения экземпляра HistoryManager
     public static HistoryManager getDefaultHistory() {
-        // Возвращаем новый экземпляр InMemoryHistoryManager
-        return new InMemoryHistoryManager();
+        return new InMemoryHistoryManager(); // Создаем и возвращаем InMemoryHistoryManager
     }
-
 }
+
+
+

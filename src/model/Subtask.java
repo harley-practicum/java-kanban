@@ -6,9 +6,15 @@ public class Subtask extends Task {
 
     private int epicId; // ID эпика, к которому относится подзадача
 
+    public void setEpicId(int epicId) {
+        this.epicId = epicId;
+    }
+
+    // Конструктор
     public Subtask(int id, String title, String description, Status status, int epicId) {
         super(id, title, description, status);
         this.epicId = epicId; // Установка ID эпика
+        this.type = TaskType.SUBTASK; // Устанавливаем тип как SUBTASK
     }
 
     public int getEpicId() {
@@ -39,4 +45,14 @@ public class Subtask extends Task {
                 '}';
     }
 
+    @Override
+    public String toCSV() {
+        return id + "," +
+                type + "," +
+                title + "," +
+                status + "," +
+                description + "," +
+                epicId;
+    }
 }
+

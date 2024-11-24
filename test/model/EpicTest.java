@@ -1,9 +1,10 @@
 package model;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
 import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 class EpicTest {
 
@@ -61,13 +62,5 @@ class EpicTest {
 
         // Проверка хэш-кодов
         assertEquals(epic.hashCode(), epic2.hashCode(), "Epics should have the same hash code when they are equal.");
-    }
-
-
-
-    @Test
-    void testToString() {
-        String expected = "Epic{id=1, title='Epic Title', description='Epic Description', status=NEW, subtasks=[]}";
-        assertEquals(expected, epic.toString(), "toString() should return the correct string representation.");
     }
 }

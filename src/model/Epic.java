@@ -8,9 +8,10 @@ public class Epic extends Task {
 
     private final List<Subtask> subtasks; // Список подзадач
 
-    public Epic(int id, String title, String description,Status status) {
+    public Epic(int id, String title, String description, Status status) {
         super(id, title, description, status);
         this.subtasks = new ArrayList<>(); // Инициализация списка подзадач
+        this.type = TaskType.EPIC; // Устанавливаем тип как EPIC
     }
 
     public void addSubtask(Subtask subtask) {
@@ -55,7 +56,6 @@ public class Epic extends Task {
         return Objects.hash(id); // hashCode только по id
     }
 
-
     @Override
     public String toString() {
         return "Epic{" +
@@ -66,5 +66,16 @@ public class Epic extends Task {
                 ", subtasks=" + subtasks +
                 '}';
     }
+
+        @Override
+        public String toCSV() {
+        return id + "," +
+                type + "," +
+                title + "," +
+                status + "," +
+                description;
+    }
+
 }
+
 
