@@ -18,11 +18,11 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 
     // Метод для загрузки данных из файла
 
-    public static FileBackedTaskManager loadFromFile(File file) {
+    public static InMemoryTaskManager loadFromFile(File file) {
         HistoryManager historyManager = Managers.getDefaultHistory();
-        FileBackedTaskManager manager = new FileBackedTaskManager(historyManager, file.getPath());
+        InMemoryTaskManager manager = new InMemoryTaskManager(historyManager); // Создаём объект родителя
 
-        int maxId = 0;  // Переменная для отслеживания максимального ID из файла
+        int maxId = 0; // Для хранения максимального ID
 
         try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
             String line;
@@ -37,8 +37,8 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 
                 String[] fields = line.split(",");
 
-                int id = Integer.parseInt(fields[0]);  // Получаем ID из файла
-                maxId = Math.max(maxId, id);  // Обновляем максимальный ID
+                int id = Integer.parseInt(fields[0]); // Получаем ID из файла
+                maxId = Math.max(maxId, id); // Обновляем максимальный ID
 
                 TaskType taskType = TaskType.valueOf(fields[1]); // Тип задачи
                 String title = fields[2];                       // Название задачи
@@ -47,29 +47,19 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 
                 switch (taskType) {
                     case TASK:
-                        // Используем getNextId() для задания ID
                         Task task = new Task(manager.getNextId(), title, description, status);
-                        manager.addNewTask(task);
-
+                        manager.addNewTask(task); // Вызов метода родителя
                         break;
 
                     case EPIC:
-                        // Используем getNextId() для задания ID
                         Epic epic = new Epic(manager.getNextId(), title, description, status);
-                        manager.addNewTask(epic);
+                        manager.addNewEpic(epic); // Вызов метода родителя
                         break;
 
                     case SUBTASK:
-                        int epicId = Integer.parseInt(fields[5]); // ID эпика
-                        // Используем getNextId() для задания ID
+                        int epicId = Integer.parseInt(fields[5]); // Получаем ID эпика из файла
                         Subtask subtask = new Subtask(manager.getNextId(), title, description, status, epicId);
-                        manager.addNewTask(subtask);  // Добавляем подзадачу
-
-
-                        Epic parentEpic = manager.epics.get(subtask.getEpicId());
-                        if (parentEpic != null) {
-                            parentEpic.addSubtask(subtask);
-                        }
+                        manager.addNewSubtask(subtask); // Этот метод сам позаботится о добавлении подзадачи в коллекцию и связывании с эпиком
                         break;
 
                     default:
@@ -81,14 +71,9 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
             System.err.println("Ошибка при загрузке данных из файла: " + e.getMessage());
         }
 
-        // Устанавливаем nextId в качестве maxId + 1
-        manager.nextId = maxId + 1;  // Следующий ID будет maxId + 1
-
-        System.out.println("Данные успешно загружены из файла.");
-        return manager;
+        return manager; // Возвращаем объект менеджера
     }
 
-    // Метод для сохранения данных в файл
     private void saveToFile() throws IOException {
         // Используем try-with-resources для записи в файл
         BufferedWriter writer = Files.newBufferedWriter(Paths.get(filePath));
@@ -115,6 +100,8 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
             writer.newLine();
         }
     }
+
+
 
     @Override
     public int addNewTask(Task task) throws IOException {

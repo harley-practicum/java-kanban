@@ -58,7 +58,7 @@ class FileBackedTaskManagerTest {
         originalManager.addNewSubtask(subtask);
 
         // Загружаем данные из файла в новый менеджер
-        FileBackedTaskManager loadedManager = FileBackedTaskManager.loadFromFile(file);
+        InMemoryTaskManager loadedManager = FileBackedTaskManager.loadFromFile(file);
 
         // Проверяем, что все задачи восстановились корректно
         assertNotNull(loadedManager, "Загруженный менеджер не должен быть null");
